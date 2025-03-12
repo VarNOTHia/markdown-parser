@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  padding: 20px;
+  max-width: 800px;
+  margin: auto;
+}
+
+.md-heading-1, .md-heading-2, .md-heading-3, .md-heading-4, .md-heading-5, .md-heading-6 {
+  color: #333;
+}
+
+.md-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.md-table td, .md-table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.md-table-header {
+  background-color: #f4f4f4;
+}
+
+.md-code-block {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.md-inline-code {
+  background: rgb(255, 232, 232);
+  color: rgb(235, 75, 60);
+  padding: 2px 5px;
+  border-radius: 3px;
+}

@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path, { dirname, join, extname } from 'path';
-import rulesHandler from './rulesHandler.ts';
 import htmlWrapper from './htmlWrapper.ts';
+import parseMarkdown from './handler/parser.ts';
 // 将 import.meta.url 转换为文件路径
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,7 +26,7 @@ async function htmlGenerator(filename: string) {
 
 // 简单的 Markdown 到 HTML 转换
 function markdownToHtml(markdown: string): string {
-  let mdContent = rulesHandler(markdown, false);
+  let mdContent = parseMarkdown(markdown, false);
   return htmlWrapper('myPage', mdContent);
 }
 

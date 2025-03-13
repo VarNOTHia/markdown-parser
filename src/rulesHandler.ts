@@ -1,3 +1,5 @@
+// DEPRECATED.
+
 import hljs from "highlight.js";
 
 type className = 'className' | 'class';
@@ -20,7 +22,6 @@ const handleTitle = (text: string, className: className) => {
 }
 
 const imgs: string[] = []; // 保护 img。
-const imgIndex = 0;
 
 const handleImg = (text: string, className: className) => {
   const rule: RegExp = /!\[([^\]]*)\]\(([^)]+)\)/g;

@@ -7,7 +7,6 @@ tags:
 - 技术相关
 - JavaScript
 - React.js
-
 ---
 
 近期我变回了「社会闲杂人员」，想了想前三个月做的事情，还是有必要做一个复盘的。这篇文章是「关于项目是怎么跑起来」的角度做的整理。这也是相继前两篇（JS 作用域、异步）之后的第三篇文章了。
@@ -56,12 +55,6 @@ tags:
 
 然后就进入了浏览器的主场，开始渲染页面。
 
-##### 可选：建立 WebSocket 连接
-
-如果我想实时接收服务器传来的更新内容，HTTP 的长轮询对于反复检查扫码还可以，假如是实时游戏那就龍比了。TCP 协议本身就是**双工**的，HTTP 设计的时候并没有预料到网络游戏遍地走的今天，所以一个新的协议产生了。
-
-WebSocket 协议一般来说会利用 HTTP 协议加上一些 header 进行握手升级。（**Connection**: **Upgrade**, **Upgrade**: **WebSocket**, Sec-WebSocket-Key:....)。例如 Socket.io 库也是这样处理的。
-
 ### 浏览器做了什么处理？
 
 #### 渲染
@@ -100,11 +93,13 @@ WebSocket 协议一般来说会利用 HTTP 协议加上一些 header 进行握�
 
 所以引入了 **内存缓存** 和 **磁盘缓存** 两档（在开发者工具里面也可以查看，Network - size 里面就会提示），将请求的 URL 作为 key，响应 / 资源作为 value，进行保存。
 
-| 机制         | 适用场景        | 作用范围   | 生命周期                                           |
-| ------------ | --------------- | ---------- | -------------------------------------------------- |
-| **DOM 引用** | JavaScript 变量 | 当前页面   | 页面刷新即失效                                     |
-| **内存缓存** | 静态资源加速    | 当前页面   | 浏览器关闭即失效（页面关闭需要考虑多页面共享情况） |
-| **磁盘缓存** | 资源跨会话缓存  | 整个浏览器 | 取决于 `Cache-Control` 过期时间                    |
+
+
+| 机制         | 适用场景        | 作用范围   | 生命周期                                           | 适用关键字               |
+| ------------ | --------------- | ---------- | -------------------------------------------------- | ------------------------ |
+| **DOM 引用** | JavaScript 变量 | 当前页面   | 页面刷新即失效                                     | `window`、`document`     |
+| **内存缓存** | 静态资源加速    | 当前页面   | 浏览器关闭即失效（页面关闭需要考虑多页面共享情况） | `Cache-Control: max-age` |
+| **磁盘缓存** | 资源跨会话缓存  | 整个浏览器 | 取决于 `Cache-Control` 过期时间                    | `Cache-Control: public`  |
 
 ##### 缓存行为
 
@@ -114,7 +109,7 @@ WebSocket 协议一般来说会利用 HTTP 协议加上一些 header 进行握�
 
 ​	（**响应头**字段：**Cache-Control**: public, max-age=86400（**长度是秒**），时间长短；搭配 **expires**（GMT 时间））
 
-协商缓存：每次发现资源找**服务端**请求，得到 **304（Not Modified）**才会使用。（Cache-Control: no-cache，强制使用**协商缓存**）
+协商缓存：每次发现资源找**服务端**请求，得到 **304（Not Modified）**才会使用。
 
 ​	（**响应头**字段：**Last-Modified**：服务器上资源的最后修改时间。浏览器通过 `If-Modified-Since` **请求**头携带它的值来检查资源是否修改。
 
@@ -223,30 +218,9 @@ React 从 16 开始的迭代带来了另外一个很重要的优势，就是「*
 
 #### Fiber、render
 
-16 以前的 React 只能递归遍历、不可中断的访问 **VDOM 树**，而现在 Fiber 就解决了这个问题。
+16 以前的 React 只能递归遍历、不可中断的访问 VDOM 树，而现在 Fiber 就解决了这个问题。
 
-VDOM 是一个通用的**描述层**，从 JSX（一种 UI 描述）编译而来，而 Fiber 成为了 React 基本的**调度单元**。
-
-```ts
-function App() {
-  return (
-    <div>
-      <h1>Hello World</h1>
-      <p>React Virtual DOM</p>
-    </div>
-  );
-}
-
-// equals
-const vdom = React.createElement(
-  "div",
-  null,
-  React.createElement("h1", null, "Hello World"),
-  React.createElement("p", null, "React Virtual DOM")
-);
-```
-
-React 16 开始，架构分为了三部分：**Scheduler**（调度器，判断任务优先级，高优先级优先进入 Reconciler）、**Reconciler**（调和器，找出变化组件并打标记）和 **Renderer**（渲染器，Fiber to VDOM，渲染变化的组件（上个阶段已有标记）到页面上）。它体现在数据结构上就是 `Fiber` 架构，来实现**异步可中断更新**。
+React 16 开始，架构分为了三部分：**Scheduler**（调度器，判断任务优先级，高优先级优先进入 Reconciler）、**Reconciler**（协调器，找出变化组件并打标记）和 **Renderer**（渲染器，Fiber to VDOM，渲染变化的组件（上个阶段已有标记）到页面上）。它体现在数据结构上就是 `Fiber` 架构，来实现**异步可中断更新**。
 
 **（render = reconciler + scheduler，代表生命周期五步的前两步、和 commit = renderer，useEffect 对应的后三步，这两个阶段就是 React Fiber 以来渲染的主要流程。）**
 
@@ -259,12 +233,12 @@ function FiberNode(
 ) {
       
   // 静态数据结构的部分，保存组件相关信息
-  this.tag = tag;					// Fiber 对应组件的类型 Function/Class/Host...
+  this.tag = tag;					// Fiber对应组件的类型 Function/Class/Host...
+  this.key = key;					// key属性
   this.elementType = null;	
   this.type = null;					// 对于 FunctionComponent，指函数本身
-  this.stateNode = null;			// Fiber对应的真实DOM节点 （双向关联，同时向 DOM 注入 props）
-  this.key = key;					// key 属性
-    
+  this.stateNode = null;			// Fiber对应的真实DOM节点
+
   // 用于连接其他 Fiber 节点形成 Fiber 树
   this.return = null;		// 指向父级 Fiber 节点
   this.child = null;		// 指向子 Fiber 节点
@@ -274,15 +248,9 @@ function FiberNode(
   this.ref = null;
 
   // 作为动态的工作单元的属性 —— 保存本次更新造成的状态改变相关信息
-  // 输入数据，即传递给此 Fiber 进行处理的数据（参数、props 等）。
   this.pendingProps = pendingProps;	// props
-    
-  // 用于生成最终输出的 props（也就是 上次 渲染时用过的）。
   this.memoizedProps = null;
-    
-  this.updateQueue = null;		// 存储 useEffect 里面的 effect 事件（异步函数等等）的环状链表，本质上是更新队列，下次 commit 的时候一并清空。
-
-  // 用于生成最终输出的状态（例如组件实例的 state），包含所有的 hook 的初始化。
+  this.updateQueue = null;		// 存储 useEffect 的 effect 的环状链表。
   this.memoizedState = null;	// hook 组成单向链表挂载的位置。mount 的阶段就完成了这个过程，所以不能在条件语句里面调用 hook。
   this.dependencies = null;
 
@@ -293,25 +261,18 @@ function FiberNode(
   this.subtreeFlags = NoFlags;
   this.deletions = null;
 
-  // 调度优先级相关，在这里为不同的更新任务分配优先级：
-  /*
-  优先级	       ｜  适用场景	 ｜ 示例
-  SyncLane     ｜  同步任务	 ｜setState 事件处理
-  InputLane	   ｜ 用户输入	   ｜onChange
-  TransitionLane	｜过渡动画	 ｜startTransition
-  IdleLane	   ｜低优先级任务	｜预加载数据
-  */
+  // 调度优先级相关
   this.lanes = NoLanes;
   this.childLanes = NoLanes;
 
-  // 指向该fiber在另一次更新时对应的fiber，也就是 workInProgress 树。
-  this.alternate = null;		// workInProgress
+  // 指向该fiber在另一次更新时对应的fiber
+  this.alternate = null;
 }
 ```
 
 在渲染过程（`reactDOM.render`）当中，
 
-**VDOM 树被转换成 Fiber 链表，然后通过 `document.createElement` / `document.createTextNode` 转换成真实的 DOM 实例。**
+VDOM 树被转换成 Fiber 链表，然后通过 `document.createElement` / `document.createTextNode` 转换成真实的 DOM 实例。
 
 然后将 Fiber 节点和它的 `pendingProps` **关联**到真实 dom 的属性上，反过来把真实 DOM 实例**关联**回 Fiber 的 `stateNode` 上。
 
@@ -364,34 +325,11 @@ React 的同构是指一套代码可以在客户端和服务端执行。服务�
 
 所以省流就是，水合本质上就是比对之后关联节点属性，一旦成功关联 DOM 和 Fiber，事件处理就实现了激活。这就是三体人干实现复苏的原理。
 
-##### **SSR + Hydration 的 Fiber 树**
-
-| 阶段                    | 作用                    | 是否创建 DOM                         | 是否存储 state                 | 是否执行副作用           |
-| ----------------------- | ----------------------- | ------------------------------------ | ------------------------------ | ------------------------ |
-| **SSR（服务端）**       | 生成 HTML               | ❌ 否，仅返回 HTML 字符串             | ✅ 是，存储组件的 `props/state` | ❌ 否，不执行 `useEffect` |
-| **Hydration（客户端）** | 复用 HTML，赋予交互能力 | ⚠️ **尽量不创建**（复用服务器端 DOM） | ✅ 是，存储组件状态             | ✅ 是，执行 `useEffect`   |
-
-所以，SSR **不是直接跳过 Fiber，而是先在服务端构建 Fiber 树用于生成 HTML**，然后在客户端**再次构建 Fiber 树，并与 HTML 绑定，使其可交互**。
-
-### 小结
-
-回顾这部分内容，React 渲染流程省流一下，就是这样一个 timeline：
-
-阶段 `render` =（调度器 + 协调器）= 生命周期的 `constructor` + `render` = `reactDOM.render`= `ReactDOMServer.renderToString` + `reactDOM.hydrate`，这个时候绑定 DOM 和 Fiber 节点，实现交互。
-
-阶段 `commit` = （渲染器） = 生命周期 `mount` 系列，mount 中把 Hook 以链表形式插入 Fiber 的 **memoizedState**，这个阶段和 CSR / SSR 无关。这个时候处理上一个阶段保存的 effect 带来的**副作用**。
-
-每次触发更新的时候，都会构建一个平行的 **WorkInProgress** 树，在更新结束的时候，这棵树通过 Diff 把变更合并到 **Current** 上。
-
-同时，FiberNode 下存在一个 **updateQueue** 是实时更新的，因为 useEffect 的触发条件和 state 的改动可能和渲染没有关系。到了下一个周期的时候，**updateQueue** 清空，在下一次**调度器**发挥作用的时候，就会把这些东西在叫做 **WorkInProgress** 的另一颗 Fiber 树上发挥作用，在下一步的**调和器**里面使用 Diff 方法进行比对并加载到 **current** 的 Fiber 树上面。当 commit 结束，上次的副作用开始生效。
-
-同理，prop 的更新会在 **WIP** 树创建的时候存储到 **pendingProp** 当中，在调和过程中和 Current 树的 **memoizedProp** 当中进行对比，更新完毕的时候从 pending 存储到 memoized 里面，以便下次进行 diff 比较。这就是 **prop** 的原理，
-
 ### 服务端渲染、静态内容生成与 SEO
 
 为了页面加载更快，已经采取了服务端渲染。但是有什么**更快**的办法，甚至我希望在页面访问的时候就直接给我一个现成的页面呢？
 
-这里就可以引入页面预制菜 —— **SSG**。（Next.js，getStaticProps，并非**运行时**而是**编译时**产生）
+这里就可以引入页面预制菜 —— **SSG**。（Next.js，getStaticProps）
 
 | **方式** | HTML 存储到哪里            | 服务器角色                       | 特点                          |
 | -------- | -------------------------- | -------------------------------- | ----------------------------- |
@@ -402,7 +340,7 @@ React 的同构是指一套代码可以在客户端和服务端执行。服务�
 搜索引擎是一个复杂的机制，而服务端渲染带来的优点主要在两点上：
 
 1. 由上面彻底理解，SSR 乃至 SSG 带来一个更完善的**HTML**，**开盖即食**。而传统搜索引擎的爬虫可能并没有能力处理 CSR 带来的 JS，有的时候只爬到一个空壳子。
-2. 而 SSR 这样，在 **FCP**（第一个内容渲染）、**FP** (白屏时间，从请求到第一个像素）等参数上存在优势，如今的搜索引擎的爬虫虽然可以处理 CSR 了，但他也会按照这些参数做出**排名**。
+2. 而 SSR 这样，在 **FCP**、**FP** 等参数上存在优势，如今的搜索引擎的爬虫虽然可以处理 CSR 了，但他也会按照这些参数做出**排名**。
 
 附 SEO 工作机制：
 
@@ -431,26 +369,10 @@ Q：某 *** 论坛是怎么做到污染了劳资每个技术搜索内容的？
 
 A：服务端渲染 + **静态内容生成**文章，开盖即食的 SEO 友好要素 + 每个文章独立链接（/[articleID]）+ Next.js 静态生成，一切为了 SEO 打造。
 
-### 新特性 —— RSC
+### 小结
 
-初看这个代码，可能会觉得好像没什么问题吧，
+回顾这部分内容，React 渲染流程省流一下，就是这样一个 timeline：
 
-```tsx
-export default async function Page(){
-  const data = await fetch("your link");
-  const content = await data.json()
-  return (
-    <ul>
-      {content.map(post) => (
-      	<li></li>
-      )}
-    </ul>
-  )
-}
-```
+阶段 `render` =（调度器 + 协调器）= 生命周期的 `constructor` + `render` = reactDOM.render = ReactDOMServer.renderToString + reactDOM.hydrate，这个时候绑定 DOM 和 Fiber 节点，实现交互。
 
-仔细一看卧槽不对劲，为什么这个请求连 useEffect 都没有，这到底是什么东西😨，哦原来是 React 19 的 Server Component。
-
-它本质上只走到 ReactDOMServer.renderToString 这一步，只能返回**静态、不能水合**的页面，所以 Hook 不可用。如果要使用 Hook，可以在一个组件顶端加上 `'use client'` 来做出区分，这样会让服务端和客户端组件区分的更明显。**RSC（取代 getServerSideProps）和 Hook 二者不能并存，只能在一个不含任何两者元素的母组件里面同框。**
-
-这就是 React 19 + Next 的开发哲学 —— 在一个 **page** 文件里面确定页面的**骨架**，引入不同的 RSC / 含 Hooks 组件来搭建起一个页面，明确的区分开两者，明确的是 **Page** 负责水合。
+阶段 `commit` = （渲染器） = 生命周期 `mount` 系列，mount 中把 Hook 以链表形式插入 Fiber，这个阶段和 CSR / SSR 无关。

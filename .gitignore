@@ -51,3 +51,6 @@ Thumbs.db
 
 # Optional outputs
 out/
+
+# Posts
+public/__posts/

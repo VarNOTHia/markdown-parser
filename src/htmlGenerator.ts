@@ -9,7 +9,7 @@ const __dirname = dirname(__filename);
 
 // 构造 example.md 文件的路径
 async function htmlGenerator(filename: string) {
-  const filePath = join(__dirname, '../public/' + filename);
+  const filePath = join(__dirname, '../public/__posts/' + filename);
   // 构造输出的 HTML 文件的路径
   const outputFilePath = join(__dirname, '../out', filename.replace(extname(filename), '.html'));
 

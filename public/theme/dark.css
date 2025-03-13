@@ -52,6 +52,11 @@ body {
   font-family: "Courier New", Courier, monospace;
 }
 
+.md-img {
+  max-width: 100%;
+  margin-top: 20px;
+}
+
 a {
   color: #4ea1f3;
 }

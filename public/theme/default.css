@@ -44,3 +44,16 @@ body {
   padding: 2px 5px;
   border-radius: 3px;
 }
+
+.md-img {
+  max-width: 100%;
+  margin-top: 20px;
+}
+
+a {
+  color: #4ea1f3;
+}
+
+a:hover {
+  color: #6cb8ff;
+}

@@ -18,6 +18,20 @@ const handleTitle = (text: string, className: className) => {
     return `<h${level} ${className}='md-heading-${level}'>${content}</h${level}>`;
   });
 }
+
+const imgs: string[] = []; // 保护 img。
+const imgIndex = 0;
+
+const handleImg = (text: string, className: className) => {
+  const rule: RegExp = /!\[([^\]]*)\]\(([^)]+)\)/g;
+  return text.replace(rule, (match, alt: string, src: string) => {
+    const placeholder = `@@IMG_${imgs.length}@@`;
+    imgs.push(`<img ${className}='md-img' src=${src} alt=${alt}`);
+
+    return placeholder;
+  })
+}
+
 const codeBlocks: string[] = []; // 存储代码块的数组
 
 // 处理大代码块（```...```）
@@ -100,11 +114,15 @@ const handleContext = (text: string, className: className) => {
     text = text.replace(`@@CODEBLOCK_${index}@@`, block);
   });
 
+  imgs.forEach((img, index) => {
+    text = text.replace(`@@IMG_${index}@@`, img);
+  })
+
   return text;
 };
 
 
-const ruleSet = [handleTitle, handleCodeBlock, handleInlineCode, handleChart, handleBold, handleItalic, handleContext];
+const ruleSet = [handleTitle, handleImg, handleCodeBlock, handleInlineCode, handleChart, handleBold, handleItalic, handleContext];
 
 const rulesHandler = (text: string, isJSX: boolean) => {
   let className: className = isJSX ? 'className' : 'class';

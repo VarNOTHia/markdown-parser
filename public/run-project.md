@@ -376,3 +376,8 @@ A：服务端渲染 + **静态内容生成**文章，开盖即食的 SEO 友好�
 阶段 `render` =（调度器 + 协调器）= 生命周期的 `constructor` + `render` = reactDOM.render = ReactDOMServer.renderToString + reactDOM.hydrate，这个时候绑定 DOM 和 Fiber 节点，实现交互。
 
 阶段 `commit` = （渲染器） = 生命周期 `mount` 系列，mount 中把 Hook 以链表形式插入 Fiber，这个阶段和 CSR / SSR 无关。
+
+### 测试图片
+
+![72278710_p0_master1200_waifu2x_art_scale](/Users/fty/Pictures/nijigen/72278710_p0_master1200_waifu2x_art_scale.png)测试一下这个图片怎么解析（
+

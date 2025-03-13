@@ -1,4 +1,5 @@
 type className = 'className' | 'class';
+type Handler = (text: string, className: className) => string;
 
 import { handleBold } from "../rules/bold.ts";
 import { handleChart } from "../rules/chart.ts";
@@ -23,7 +24,7 @@ const handlers = [handleTitle,
 
 const parseMarkdown = (text: string, isJSX: boolean) => {
   let className: className = isJSX ? 'className' : 'class';
-  handlers.forEach(fn => {
+  handlers.forEach((fn: Handler) => {
     text = fn(text, className);
   });
   return text;

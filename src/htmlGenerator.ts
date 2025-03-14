@@ -27,7 +27,7 @@ async function htmlGenerator(filename: string) {
 // 简单的 Markdown 到 HTML 转换
 function markdownToHtml(markdown: string): string {
   let mdContent = parseMarkdown(markdown, false);
-  return htmlWrapper('myPage', mdContent);
+  return htmlWrapper('myPage', mdContent, 'dark');
 }
 
 export default htmlGenerator;

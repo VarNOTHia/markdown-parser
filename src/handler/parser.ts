@@ -7,11 +7,13 @@ import { generateCodePlaceholder, restoreCodeBlock } from "../rules/codeBlock.ts
 import { generateImgPlaceholder, restoreImg } from "../rules/img.ts";
 import { handleInlineCode } from "../rules/inlineCode.ts";
 import { handleItalic } from "../rules/italic.ts";
+import { createLinkPlaceholder, restoreLink } from "../rules/link.ts";
 import { handleParagraph } from "../rules/paragraph.ts";
 import { handleTitle } from "../rules/title.ts";
 
 const handlers = [handleTitle, 
-  generateImgPlaceholder, 
+  generateImgPlaceholder,
+  createLinkPlaceholder,
   generateCodePlaceholder, 
   handleInlineCode, 
   handleChart, 
@@ -19,6 +21,7 @@ const handlers = [handleTitle,
   handleItalic, 
   handleParagraph,
   restoreCodeBlock,
+  restoreLink,
   restoreImg
 ];
 

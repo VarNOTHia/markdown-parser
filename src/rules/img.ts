@@ -4,9 +4,10 @@ const imgPlaceHolders: string[] = [];
 export const imgRegex: RegExp = /!\[([^\]]*)\]\(([^)]+)\)/g;
 
 export const generateImgPlaceholder = (text: string, className: className) => {
-  return text.replace(imgRegex, (match, alt: string, src: string) => {
+  return text.replace(imgRegex, (match, alt = '', src: string) => {
     const placeholder = `@@IMG@${imgPlaceHolders.length}@@`;
-    imgPlaceHolders.push(`<img ${className}='md-img' src=${src} alt=${alt}`);
+    const sanitizedAlt = alt || '';
+    imgPlaceHolders.push(`<img ${className}='md-img' src=${src} alt=${sanitizedAlt}>`);
     return placeholder;
   })
 }
